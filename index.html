@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<!-- Open Graph (LinkedIn, Facebook, WhatsApp) -->
+<meta property="og:title" content="Español II · Portal del Estudiante">
+<meta property="og:description" content="Micrositio interactivo para Español II: módulos, flashcards, simulador y guía completa alineada a la NEM.">
+<meta property="og:image" content="https://TU-USUARIO.github.io/tu-repo/preview.png">
+<meta property="og:url" content="https://TU-USUARIO.github.io/tu-repo/">
+<meta property="og:type" content="website">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Español II · Portal del Estudiante">
+<meta name="twitter:description" content="Explora, estudia y repasa todo el ciclo escolar en un solo lugar.">
+<meta name="twitter:image" content="https://TU-USUARIO.github.io/tu-repo/preview.png">
+
+<title>Español II · Portal del Estudiante · 2° Grado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+:root{
+  --tinta:#171717;--papel:#F4EFE6;--terracota:#B85C38;
+  --azul:#17324D;--verde:#6F8F72;
+  --t1:#F5C300;--t2:#E08C00;--t3:#C47A00;
+  --t1d:#8a6e00;--t2d:#8a5500;--t3d:#7a4c00;
+  --soft:#3A3631;--line:#E2D9C8;--card:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--papel);color:var(--tinta);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+.fd{font-family:'Fraunces',Georgia,serif;}
+.fm{font-family:'IBM Plex Mono',monospace;}
+::selection{background:var(--t1);color:var(--tinta);}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#d8cdb8;border-radius:8px;}
+@keyframes fu{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes fi{from{opacity:0;}to{opacity:1;}}
+@keyframes sc{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:none;}}
+.afu{animation:fu .5s cubic-bezier(.2,.7,.3,1) both;}
+.afi{animation:fi .4s ease both;}
+.asc{animation:sc .35s cubic-bezier(.2,.7,.3,1) both;}
+.flip-wrap{perspective:1400px;}
+.flip-inner{transition:transform .5s cubic-bezier(.2,.7,.3,1);transform-style:preserve-3d;position:relative;}
+.flip-wrap.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.flip-back{transform:rotateY(180deg);position:absolute;inset:0;}
+.tabbtn{background:none;border:none;cursor:pointer;font-family:inherit;position:relative;}
+.tabbtn::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:transparent;transition:background .2s;}
+.tabbtn.active::after{background:currentColor;}
+button:focus-visible{outline:2.5px solid var(--azul);outline-offset:2px;border-radius:3px;}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useMemo,useCallback}=React;
+
+/* ── DATOS ── */
+const T=[
+  {id:"t1",n:"Primer Trimestre",c:"#F5C300",cd:"#8a6e00",s:"1T",
+   lema:"La lengua que somos",
+   desc:"Cómo funciona el lenguaje, cómo cambia con el tiempo y el territorio, y cómo los pueblos guardan su memoria en mitos y leyendas.",
+   ejes:["Funciones del lenguaje","Variación lingüística","Mitos y leyendas","Comprensión lectora","Ortografía: acentuación"],
+   conceptos:[
+    {cl:"Funciones del lenguaje",t:"Función emotiva",d:"Expresa sentimientos o emociones del hablante. Ej.: «¡Qué alegría escucharte!».",p:"SM pp. 12–15"},
+    {cl:"Funciones del lenguaje",t:"Función apelativa",d:"Busca influir en el receptor. Ej.: «Participa en el taller».",p:"SM pp. 12–15"},
+    {cl:"Funciones del lenguaje",t:"Función referencial",d:"Informa sobre hechos verificables y datos objetivos. Predomina en textos científicos.",p:"SM pp. 12–15"},
+    {cl:"Funciones del lenguaje",t:"Función fática",d:"Inicia, mantiene o verifica el canal de comunicación. Ej.: «¿Me escuchas bien?».",p:"SM pp. 12–15"},
+    {cl:"Funciones del lenguaje",t:"Función metalingüística",d:"Usa el lenguaje para explicarse a sí mismo. Ej.: «'Tlatoani' significa gobernante».",p:"SM pp. 12–15"},
+    {cl:"Funciones del lenguaje",t:"Función poética",d:"Se centra en la estética y el estilo del mensaje: metáforas y figuras retóricas.",p:"SM pp. 12–15"},
+    {cl:"Variación lingüística",t:"Contexto formal e informal",d:"El registro cambia según la situación: una entrevista exige formalidad; un mensaje a un amigo admite jerga.",p:"SM pp. 20–24"},
+    {cl:"Variación lingüística",t:"Cambio semántico",d:"Una palabra adquiere un nuevo significado. Ej.: «padre» pasa de progenitor a «increíble».",p:"SM pp. 20–24"},
+    {cl:"Variación lingüística",t:"Cambio fonético",d:"Variación en el sonido. Ej.: en regiones de Chihuahua «ch» se pronuncia «sh» (moshila).",p:"SM pp. 20–24"},
+    {cl:"Variación lingüística",t:"Lengua romance",d:"El español proviene del latín del Imperio Romano; por eso es lengua romance.",p:"SM pp. 20–24"},
+    {cl:"Variación lingüística",t:"Jerga",d:"Vocabulario especializado de un grupo social. Ej. juvenil: «Ese profe sí rifa».",p:"SM pp. 25–27"},
+    {cl:"Variación lingüística",t:"Variables geográficas y dialectales",d:"Diferencias del español según la región. Ej.: en Argentina «vos» reemplaza a «tú».",p:"SM pp. 25–27"},
+    {cl:"Variación lingüística",t:"Polisemia",d:"Fenómeno por el cual una palabra tiene múltiples significados.",p:"SM pp. 25–27"},
+    {cl:"Mitos y leyendas",t:"Mito",d:"Relato con héroes, semidioses y seres fantásticos no comprobables.",p:"SM pp. 34–39"},
+    {cl:"Mitos y leyendas",t:"Leyenda",d:"Mezcla hechos o personajes reales con elementos fantásticos.",p:"SM pp. 34–39"},
+    {cl:"Mitos y leyendas",t:"Mito teogónico",d:"Explica el origen y atributos de los dioses y su participación en la vida humana.",p:"SM pp. 34–39"},
+    {cl:"Mitos y leyendas",t:"Mito antropogénico",d:"Explica cómo fue creado el ser humano.",p:"SM pp. 34–39"},
+    {cl:"Mitos y leyendas",t:"Leyenda histórica",d:"Incluye lo fantástico pero se basa en hechos reales: una guerra, un personaje histórico.",p:"SM pp. 40–43"},
+    {cl:"Mitos y leyendas",t:"Leyenda religiosa",d:"Narra un suceso milagroso relacionado con figuras religiosas o santos.",p:"SM pp. 40–43"},
+    {cl:"Ortografía",t:"Reglas de acentuación",d:"Agudas, graves y esdrújulas; el acento marca la sílaba tónica y distingue significados.",p:"SM pp. 48–51"},
+    {cl:"Ortografía",t:"Diptongo e hiato",d:"El diptongo une dos vocales en una sílaba; el hiato las separa. La tilde puede romper un diptongo (baúl, país).",p:"SM pp. 48–51"},
+   ],
+   flash:[
+    {q:"¿Qué función del lenguaje expresa emociones del hablante?",a:"La función emotiva. Ej.: «¡Qué alegría escucharte!».",p:"SM p. 13"},
+    {q:"¿Qué función busca influir en el receptor?",a:"La función apelativa. Ej.: «Participa en el taller».",p:"SM p. 13"},
+    {q:"¿Qué cambio ocurre cuando «padre» significa «increíble»?",a:"Un cambio semántico: adquiere un significado nuevo.",p:"SM p. 22"},
+    {q:"¿Por qué el español es lengua romance?",a:"Porque proviene del latín del antiguo Imperio Romano.",p:"SM p. 23"},
+    {q:"¿Qué es la polisemia?",a:"El fenómeno por el cual una palabra tiene múltiples significados.",p:"SM p. 26"},
+    {q:"¿Qué diferencia al mito de la leyenda?",a:"El mito tiene seres fantásticos no comprobables; la leyenda mezcla lo real con lo fantástico.",p:"SM p. 35"},
+    {q:"¿Cómo se llama el mito que explica la creación del ser humano?",a:"Mito antropogénico.",p:"SM p. 37"},
+    {q:"¿Qué tipo de leyenda narra un milagro ligado a un santo?",a:"Leyenda religiosa.",p:"SM p. 41"},
+    {q:"¿Qué rompe un diptongo y forma un hiato?",a:"La tilde sobre la vocal débil: baúl, país, María.",p:"SM p. 50"},
+   ],
+   sim:[
+    {b:"Funciones del lenguaje",q:"Alguien dice «¿Bueno? ¿Me escuchas?» al contestar el teléfono. ¿Qué función predomina?",
+     ops:["Función poética","Función fática","Función emotiva","Función referencial"],ok:1,
+     why:"La función fática sirve para abrir o verificar el canal de comunicación."},
+    {b:"Variación lingüística",q:"Un joven escribe: «¡Bro, qué nervios, qué haces o qué!». ¿Qué fenómeno se observa?",
+     ops:["Registro formal","Jerga juvenil en contexto informal","Cambio fonético","Polisemia"],ok:1,
+     why:"El vocabulario («bro», «qué haces o qué») es jerga juvenil en contexto informal."},
+    {b:"Mitos y leyendas",q:"Un relato narra cómo los dioses crearon el maíz y de él a los seres humanos. ¿Qué tipo de mito es?",
+     ops:["Mito teogónico","Leyenda histórica","Mito antropogénico","Leyenda urbana"],ok:2,
+     why:"Explica el origen del ser humano: es un mito antropogénico."},
+    {b:"Comprensión lectora",q:"En «La Miringua», el pescador hechizado «no lucha» y el espíritu significa «olvido». ¿Por qué no se salvan las víctimas?",
+     ops:["El agua los paraliza de frío","El hechizo borra el miedo a morir","La canoa se voltea muy rápido","El espíritu amenaza a su familia"],ok:1,
+     why:"El «olvido» del hechizo borra el miedo a morir y el impulso de salvarse."},
+    {b:"Ortografía",q:"¿Cuál palabra lleva tilde por ser un hiato?",
+     ops:["cancion","arbol","baul","examen"],ok:2,
+     why:"«Baúl» tiene hiato (ba-úl); la tilde sobre la vocal débil rompe el diptongo."},
+   ]
+  },
+  {id:"t2",n:"Segundo Trimestre",c:"#E08C00",cd:"#8a5500",s:"2T",
+   lema:"Contar la propia vida, mirar al otro",
+   desc:"La autobiografía y sus recursos literarios, los textos sobre discriminación e interculturalidad, la crítica de arte y la comunicación asertiva.",
+   ejes:["Autobiografía y recursos literarios","Textos interculturales","Comunicación asertiva","Crítica de arte","Ortografía aplicada"],
+   conceptos:[
+    {cl:"Recursos literarios",t:"Metáfora",d:"Identifica o sustituye un término por otro con el que guarda semejanza. Ej.: «Mi madre era el ancla que me mantenía a flote».",p:"SM pp. 60–64"},
+    {cl:"Recursos literarios",t:"Personificación",d:"Atribuye cualidades humanas a cosas inanimadas. Ej.: «El miedo me susurró al oído».",p:"SM pp. 60–64"},
+    {cl:"Recursos literarios",t:"Hipérbole",d:"Exageración con fin expresivo. Ej.: «Aquella espera duró mil años».",p:"SM pp. 60–64"},
+    {cl:"Recursos literarios",t:"Símil",d:"Relaciona dos elementos con un nexo comparativo (como, cual). Ej.: «Temblando como una hoja».",p:"SM pp. 60–64"},
+    {cl:"Recursos literarios",t:"Analepsis",d:"Salto al pasado dentro de una narración presente; un recuerdo insertado en la línea temporal.",p:"SM pp. 65–67"},
+    {cl:"Autobiografía",t:"Autobiografía",d:"Texto en el que el autor narra su propia vida en primera persona. Ej.: «Vine al mundo el 12 de mayo».",p:"SM pp. 58–60"},
+    {cl:"Convivencia intercultural",t:"Diálogo intercultural",d:"Escuchar con respeto las experiencias de otras culturas y compartir las propias para construir convivencia democrática.",p:"SM pp. 72–76"},
+    {cl:"Convivencia intercultural",t:"Asimetrías sociales",d:"Diferencias sociales, económicas y académicas que limitan la convivencia entre grupos distintos.",p:"SM pp. 72–76"},
+    {cl:"Convivencia intercultural",t:"Estereotipo",d:"Idea generalizada y fija sobre un grupo. Cuestionarlo promueve el diálogo intercultural.",p:"SM pp. 77–79"},
+    {cl:"Comunicación asertiva",t:"Asertividad",d:"Expresar lo que se piensa y siente con claridad y respeto, sin agredir ni someterse. Ej.: «¿Podemos acordar un horario?».",p:"SM pp. 80–83"},
+    {cl:"Comunicación asertiva",t:"Reglas del debate",d:"Respetar turnos, discutir argumentos y no atacar a las personas; el moderador asegura el orden.",p:"SM pp. 84–87"},
+    {cl:"Crítica de arte",t:"Crítica de arte",d:"Texto que interpreta y valora una obra señalando cómo sus elementos visuales comunican un mensaje.",p:"SM pp. 90–94"},
+    {cl:"Crítica de arte",t:"Disertación",d:"Exposición ordenada: presenta tema y postura, desarrolla argumentos con ejemplos y refuerza la conclusión.",p:"SM pp. 95–97"},
+    {cl:"Ortografía",t:"Uso de b/v y h",d:"«Había» (con h y b), «vivió» (con v), «llevo» (con ll y v). Distinción ortográfica fundamental.",p:"SM pp. 100–103"},
+   ],
+   flash:[
+    {q:"«Mi madre era el ancla que me mantenía a flote». ¿Qué recurso es?",a:"Metáfora: identifica a la madre con un ancla por semejanza.",p:"SM p. 61"},
+    {q:"«El miedo me susurró al oído». ¿Qué figura literaria aparece?",a:"Personificación: atribuye una acción humana (susurrar) al miedo.",p:"SM p. 62"},
+    {q:"«Aquella espera duró mil años». ¿Qué figura es?",a:"Hipérbole: exageración con fin expresivo.",p:"SM p. 62"},
+    {q:"¿Qué es una autobiografía?",a:"Texto en el que el autor narra su propia vida en primera persona.",p:"SM p. 59"},
+    {q:"¿Qué es la analepsis?",a:"Un salto al pasado dentro de la narración presente; un recuerdo insertado.",p:"SM p. 65"},
+    {q:"¿Qué limita la convivencia intercultural según Sartorello?",a:"Las asimetrías sociales, económicas y académicas entre los grupos.",p:"SM p. 74"},
+    {q:"¿Cuál es una respuesta asertiva ante una crítica?",a:"Reconocer la emoción del otro y proponer una solución conjunta, sin agredir ni evadir.",p:"SM p. 81"},
+    {q:"¿Qué regla rompe quien dice «mejor ya no opines porque no tienes razón»?",a:"La de discutir argumentos con respeto sin atacar a la persona.",p:"SM p. 85"},
+    {q:"¿Qué hace una buena crítica de arte?",a:"Señala cómo un elemento visual concreto comunica el mensaje de la obra.",p:"SM p. 92"},
+   ],
+   sim:[
+    {b:"Recursos literarios",q:"«Lloré un río de lágrimas que no tenía fin». ¿Qué recurso predomina?",
+     ops:["Personificación","Hipérbole","Metáfora pura","Analepsis"],ok:1,
+     why:"Exagera el llanto con fin expresivo: es una hipérbole."},
+    {b:"Autobiografía",q:"Un texto dice «Vine al mundo el 12 de mayo» y «debo relatar algunos sucesos». ¿Qué tipo de texto es?",
+     ops:["Cuento","Noticia","Autobiografía","Artículo de opinión"],ok:2,
+     why:"El autor narra su propia vida en primera persona: es una autobiografía."},
+    {b:"Convivencia intercultural",q:"¿Qué actividad representa mejor el diálogo intercultural en una semana de la diversidad?",
+     ops:["Carteles informativos sobre países","Ver videos sin comentarlos","Mesas donde alumnos comparten y escuchan tradiciones","Exposición de un solo grupo"],ok:2,
+     why:"El diálogo intercultural exige escucha e intercambio recíproco, no solo exhibir información."},
+    {b:"Comunicación asertiva",q:"Un compañero dice: «Siempre llegas tarde y arruinas el trabajo». ¿Cuál es la respuesta más asertiva?",
+     ops:["«Tú tampoco eres perfecto»","«Eso no es verdad»","«No quiero hablar de esto»","«Entiendo que te molesta; ¿acordamos un horario?»"],ok:3,
+     why:"Reconoce la emoción y propone una solución: eso es asertividad."},
+    {b:"Crítica de arte",q:"En «La cuna» de Morisot, una diagonal «relaciona a la madre con su hijo». ¿Qué función cumple ese análisis?",
+     ops:["Explicar el costo del cuadro","Señalar cómo un elemento visual comunica el mensaje","Demostrar que el crítico sabe más","Describir el tamaño del cuadro"],ok:1,
+     why:"La crítica conecta el recurso visual (la diagonal) con el sentido de la obra."},
+   ]
+  },
+  {id:"t3",n:"Tercer Trimestre",c:"#C47A00",cd:"#7a4c00",s:"3T",
+   lema:"Divulgar, opinar, narrar",
+   desc:"El texto de divulgación científica, el ensayo, los géneros periodísticos de opinión, el texto narrativo, los movimientos literarios latinoamericanos y el género lírico.",
+   ejes:["Divulgación científica","Ensayo","Géneros de opinión","Texto narrativo","Literatura latinoamericana","Lírica y reseña"],
+   conceptos:[
+    {cl:"Divulgación científica",t:"Texto de divulgación",d:"Comunica conocimientos científicos de forma accesible, con lenguaje claro y referencias a fuentes.",p:"SM pp. 112–116"},
+    {cl:"Divulgación científica",t:"Confiabilidad",d:"Un texto de divulgación es confiable cuando cita fuentes científicas verificables.",p:"SM pp. 112–116"},
+    {cl:"Ensayo",t:"Ensayo argumentativo",d:"Defiende una postura mediante razones y justificaciones.",p:"SM pp. 120–123"},
+    {cl:"Ensayo",t:"Ensayo expositivo",d:"Explica un tema objetivamente, sin emitir juicios personales.",p:"SM pp. 120–123"},
+    {cl:"Ensayo",t:"Rasgos del ensayo",d:"Subjetividad (postura del autor), argumentación (razones) y estructura flexible (sin esquema rígido).",p:"SM pp. 120–123"},
+    {cl:"Géneros de opinión",t:"Artículo de opinión",d:"Texto firmado que busca convencer al lector sobre un tema.",p:"SM pp. 126–130"},
+    {cl:"Géneros de opinión",t:"Editorial",d:"Texto sin firma que representa la postura del medio de comunicación.",p:"SM pp. 126–130"},
+    {cl:"Géneros de opinión",t:"Columna",d:"Texto de opinión firmado que se publica de forma regular.",p:"SM pp. 126–130"},
+    {cl:"Géneros de opinión",t:"Hecho vs. opinión",d:"El hecho es verificable («el 35% duerme menos de 6 h»); la opinión valora («esto es inaceptable»).",p:"SM pp. 131–133"},
+    {cl:"Texto narrativo",t:"Espacio y conflicto",d:"El espacio indica dónde ocurre la historia; el conflicto impulsa la trama.",p:"SM pp. 138–141"},
+    {cl:"Texto narrativo",t:"Tipos de narrador",d:"Primera persona (yo/nosotros), segunda persona (tú/usted) y tercera persona (él/ella, externo).",p:"SM pp. 138–141"},
+    {cl:"Literatura latinoamericana",t:"Literatura prehispánica",d:"Expresa la cosmovisión indígena mediante poesía y reflexión filosófica. Autor: Nezahualcóyotl.",p:"SM pp. 144–149"},
+    {cl:"Literatura latinoamericana",t:"Barroco novohispano",d:"Lenguaje complejo, ornamentado, con recursos retóricos. Autora: Sor Juana Inés de la Cruz.",p:"SM pp. 144–149"},
+    {cl:"Literatura latinoamericana",t:"Realismo mágico",d:"Integra elementos fantásticos en contextos cotidianos. Ej.: Elena Garro, «Los recuerdos del porvenir».",p:"SM pp. 144–149"},
+    {cl:"Lírica y reseña",t:"Género lírico",d:"Expresa emociones con lenguaje estético y expresivo: metáforas y recursos literarios.",p:"SM pp. 152–155"},
+    {cl:"Lírica y reseña",t:"Reseña descriptiva",d:"Presenta y describe una obra sin emitir juicios.",p:"SM pp. 156–159"},
+    {cl:"Lírica y reseña",t:"Reseña crítica",d:"Analiza una obra y emite juicios fundamentados con argumentos y criterios.",p:"SM pp. 156–159"},
+    {cl:"Lírica y reseña",t:"Sinopsis",d:"Resumen del contenido sin revelar el final, para dar una idea general de la obra.",p:"SM pp. 156–159"},
+    {cl:"Ortografía",t:"Copretérito",d:"Tiempo verbal de acciones pasadas habituales: «veía», «vivía», «bebía», «jugaba». Se escribe -aba o con tilde -ía.",p:"SM pp. 162–165"},
+    {cl:"Ortografía",t:"Uso de c, s, z",d:"Distinción entre homófonos: «casa/caza», «haz/has», «sierra/cierra», «análisis» (con s).",p:"SM pp. 162–165"},
+   ],
+   flash:[
+    {q:"¿Qué caracteriza a un texto de divulgación científica?",a:"Comunica conocimientos científicos de forma accesible y clara.",p:"SM p. 113"},
+    {q:"¿Qué hace confiable a un texto de divulgación?",a:"Que cite fuentes científicas verificables.",p:"SM p. 115"},
+    {q:"¿Qué distingue al ensayo argumentativo del expositivo?",a:"El argumentativo defiende una postura; el expositivo explica objetivamente.",p:"SM p. 121"},
+    {q:"¿Qué diferencia a un editorial de una columna?",a:"El editorial no se firma y representa al medio; la columna es firmada y periódica.",p:"SM p. 128"},
+    {q:"«El 35% duerme menos de 6 h» vs «esto es inaceptable». ¿Cuál es hecho y cuál opinión?",a:"El dato es un hecho verificable; «inaceptable» es una opinión valorativa.",p:"SM p. 132"},
+    {q:"¿Qué pronombres usa el narrador en primera persona?",a:"Yo y nosotros; suele ser protagonista de la trama.",p:"SM p. 139"},
+    {q:"¿Qué autor representa el barroco novohispano?",a:"Sor Juana Inés de la Cruz, con lenguaje ornamentado y recursos retóricos.",p:"SM p. 146"},
+    {q:"¿Qué es el realismo mágico?",a:"La integración de lo fantástico en contextos cotidianos. Ej.: Elena Garro.",p:"SM p. 147"},
+    {q:"¿Qué diferencia a la reseña crítica de la descriptiva?",a:"La crítica emite juicios fundamentados; la descriptiva solo presenta sin valorar.",p:"SM p. 157"},
+    {q:"¿Cómo se escribe «vivir» en copretérito yo?",a:"«Vivía», con tilde en la í (hiato); no «vivia».",p:"SM p. 163"},
+   ],
+   sim:[
+    {b:"Divulgación científica",q:"Un texto sobre residuos inicia con «cuando comemos un elote» antes de definir el concepto. ¿Por qué usa esa estrategia?",
+     ops:["Para que el lector se sienta identificado antes de la info científica","Para demostrar que lo doméstico es más dañino","Para cambiar los hábitos del lector","Para narrar un descubrimiento"],ok:0,
+     why:"Parte de una experiencia cotidiana para acercar al lector antes de introducir el concepto técnico."},
+    {b:"Géneros de opinión",q:"«El IMSS ha perdido 5.3 puntos de satisfacción» dentro de una columna de opinión. ¿Qué función cumple ese dato?",
+     ops:["Es la idea principal","Es evidencia que apoya la postura del autor","Es la conclusión","Es la opinión del autor"],ok:1,
+     why:"El dato verificable funciona como evidencia que sostiene el punto de vista del columnista."},
+    {b:"Texto narrativo",q:"Un narrador usa «yo» y es protagonista de los hechos que cuenta. ¿Qué tipo de narrador es?",
+     ops:["Segunda persona","Tercera persona","Primera persona","Narrador omnisciente externo"],ok:2,
+     why:"El uso de «yo/nosotros» y su papel de protagonista lo identifican como narrador en primera persona."},
+    {b:"Literatura latinoamericana",q:"Una novela presenta hechos fantásticos como si fueran cotidianos y naturales. ¿A qué movimiento pertenece?",
+     ops:["Barroco novohispano","Literatura prehispánica","Realismo mágico","Vanguardia europea"],ok:2,
+     why:"Integrar lo fantástico en lo cotidiano sin asombro es el rasgo central del realismo mágico."},
+    {b:"Ortografía",q:"¿Cuál opción tiene verbos en copretérito bien escritos?",
+     ops:["tomava, estabamos","bebía, había","buscava, ibamos","jugava, vivia"],ok:1,
+     why:"«Bebía» y «había» llevan tilde en la í (hiato) y se escriben con b; las demás tienen errores."},
+   ]
+  }
+];
+
+/* ── ICONOS SVG ── */
+const I=({n,s=20,sw=1.8,cls=""})=>{
+  const p={
+    book:<><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></>,
+    layers:<><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></>,
+    list:<><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></>,
+    card:<><rect width="18" height="14" x="3" y="5" rx="2"/><path d="M7 9h10M7 13h6"/></>,
+    target:<><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></>,
+    search:<><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></>,
+    arr:<><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></>,
+    arrl:<><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></>,
+    check:<><path d="M20 6 9 17l-5-5"/></>,
+    x:<><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>,
+    rot:<><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></>,
+    chev:<><path d="m6 9 6 6 6-6"/></>,
+    spark:<><path d="M9.94 14.06 8.5 18.5l-1.44-4.44L2.5 12.5l4.56-1.56L8.5 6.5l1.44 4.44 4.56 1.56-4.56 1.56Z"/><path d="M18 6v4M16 8h4"/></>,
+    home:<><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></>,
+    pen:<><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" x2="2" y1="8" y2="22"/><line x1="17.5" x2="9" y1="15" y2="15"/></>,
+  };
+  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" className={cls} aria-hidden="true">{p[n]||null}</svg>;
+};
+
+/* ── PORTADA ── */
+function Portada({onEnter}){
+  return(
+    <div className="afi">
+      <header style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"22px clamp(20px,5vw,64px)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:38,height:38,borderRadius:10,background:"var(--tinta)",display:"grid",placeItems:"center",color:"var(--t1)"}}>
+            <I n="pen" s={20}/>
+          </div>
+          <div style={{lineHeight:1.1}}>
+            <div className="fm" style={{fontSize:10,letterSpacing:".18em",textTransform:"uppercase",color:"var(--soft)"}}>Portal del estudiante</div>
+            <div className="fd" style={{fontWeight:600,fontSize:16}}>Español II</div>
+          </div>
+        </div>
+        <div className="fm" style={{fontSize:10,letterSpacing:".1em",color:"var(--soft)",textAlign:"right"}}>
+          2° GRADO · SECUNDARIA<br/>2025–2026
+        </div>
+      </header>
+
+      <section style={{padding:"clamp(24px,5vw,64px) clamp(20px,5vw,64px) 20px",maxWidth:1160,margin:"0 auto"}}>
+        <div className="fm afu" style={{fontSize:11,letterSpacing:".2em",textTransform:"uppercase",color:"var(--terracota)",marginBottom:20}}>
+          Campo Formativo de Lenguajes · Fase 6
+        </div>
+        <h1 className="fd afu" style={{fontSize:"clamp(40px,8vw,100px)",fontWeight:900,lineHeight:.92,letterSpacing:"-.03em",marginBottom:20,animationDelay:".08s"}}>
+          La palabra,<br/><em style={{fontWeight:500}}>en tus manos</em><span style={{color:"var(--t1)"}}>.</span>
+        </h1>
+        <p className="afu" style={{fontSize:"clamp(15px,2vw,20px)",maxWidth:580,lineHeight:1.55,color:"var(--soft)",marginBottom:36,animationDelay:".16s"}}>
+          Todo lo que trabajamos este ciclo, organizado para anticipar, acompañar y repasar — un trimestre a la vez.
+        </p>
+
+        <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))"}}>
+          {T.map((t,i)=>(
+            <button key={t.id} onClick={()=>onEnter(t.id)} className="afu"
+              style={{textAlign:"left",border:"1px solid var(--line)",background:"var(--card)",borderRadius:18,padding:0,cursor:"pointer",overflow:"hidden",animationDelay:`${.24+i*.08}s`,transition:"transform .22s,box-shadow .22s"}}
+              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 20px 42px -20px rgba(0,0,0,.38)";}}
+              onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
+              <div style={{height:6,background:t.c}}/>
+              <div style={{padding:"22px 22px 24px"}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+                  <span className="fm" style={{fontSize:12,fontWeight:600,letterSpacing:".1em",color:t.cd}}>{t.s}</span>
+                  <span style={{color:t.c}}><I n="arr" s={18}/></span>
+                </div>
+                <h3 className="fd" style={{fontSize:22,fontWeight:600,margin:"0 0 5px",lineHeight:1.1}}>{t.n}</h3>
+                <p style={{fontSize:13.5,color:"var(--soft)",fontStyle:"italic",margin:"0 0 14px"}}>«{t.lema}»</p>
+                <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                  {t.ejes.slice(0,3).map(e=>(
+                    <span key={e} className="fm" style={{fontSize:10,letterSpacing:".03em",padding:"3px 8px",borderRadius:20,background:"var(--papel)",color:"var(--soft)",border:"1px solid var(--line)"}}>{e}</span>
+                  ))}
+                  {t.ejes.length>3&&<span className="fm" style={{fontSize:10,padding:"3px 8px",color:"var(--soft)"}}>+{t.ejes.length-3}</span>}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section style={{maxWidth:1160,margin:"0 auto",padding:"30px clamp(20px,5vw,64px) 60px"}}>
+        <div style={{borderTop:"1px solid var(--line)",paddingTop:32,display:"grid",gap:24,gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))"}}>
+          {[
+            {n:"Antes del trimestre",d:"Revisa el resumen y los conceptos para saber qué vas a aprender y dónde encontrarlo en el libro.",ic:"layers"},
+            {n:"Durante el trimestre",d:"Usa la guía y el buscador para ubicar cualquier tema mientras avanzamos en clase.",ic:"search"},
+            {n:"Al cierre",d:"Repasa con las flashcards y mide tu dominio con el simulador.",ic:"target"},
+          ].map((s,i)=>(
+            <div key={i}>
+              <div style={{color:"var(--terracota)",marginBottom:10}}><I n={s.ic} s={22}/></div>
+              <h4 className="fd" style={{fontSize:17,fontWeight:600,margin:"0 0 5px"}}>{s.n}</h4>
+              <p style={{fontSize:13.5,color:"var(--soft)",lineHeight:1.5,margin:0}}>{s.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer style={{borderTop:"1px solid var(--line)",padding:"22px clamp(20px,5vw,64px)",display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",justifyContent:"space-between"}}>
+        <span className="fm" style={{fontSize:11,color:"var(--soft)",letterSpacing:".05em"}}>Diseñado por Ángel Álvarez · Español II · Ciclo 2025–2026</span>
+        <span className="fm" style={{fontSize:11,color:"var(--soft)"}}>Colegio Regiomontano Contry · La Salle</span>
+      </footer>
+    </div>
+  );
+}
+
+/* ── BUSCADOR ── */
+function Buscador({open,onClose,onGo}){
+  const [q,setQ]=useState("");
+  const ref=useRef(null);
+  useEffect(()=>{if(open&&ref.current)ref.current.focus();},[open]);
+  useEffect(()=>{const h=e=>{if(e.key==="Escape")onClose();};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);},[onClose]);
+  const res=useMemo(()=>{
+    if(q.trim().length<2)return[];
+    const lq=q.toLowerCase();
+    const out=[];
+    T.forEach(t=>t.conceptos.forEach(c=>{
+      if(c.t.toLowerCase().includes(lq)||c.d.toLowerCase().includes(lq)||c.cl.toLowerCase().includes(lq))
+        out.push({t,c});
+    }));
+    return out.slice(0,10);
+  },[q]);
+  if(!open)return null;
+  return(
+    <div onClick={onClose} className="afi" style={{position:"fixed",inset:0,zIndex:60,background:"rgba(23,23,23,.5)",backdropFilter:"blur(4px)",display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"clamp(36px,10vh,120px) 16px 40px"}}>
+      <div onClick={e=>e.stopPropagation()} className="asc" style={{width:"100%",maxWidth:620,background:"var(--papel)",borderRadius:18,overflow:"hidden",boxShadow:"0 30px 80px -30px rgba(0,0,0,.6)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,padding:"16px 18px",borderBottom:"1px solid var(--line)"}}>
+          <span style={{color:"var(--soft)"}}><I n="search" s={18}/></span>
+          <input ref={ref} value={q} onChange={e=>setQ(e.target.value)} placeholder="Busca un tema: narrador, metáfora, copretérito…" style={{flex:1,border:"none",background:"transparent",fontSize:16,fontFamily:"inherit",color:"var(--tinta)",outline:"none"}}/>
+          <button onClick={onClose} className="fm" style={{border:"1px solid var(--line)",background:"var(--card)",borderRadius:7,padding:"3px 8px",fontSize:11,cursor:"pointer",color:"var(--soft)"}}>ESC</button>
+        </div>
+        <div style={{maxHeight:"52vh",overflowY:"auto"}}>
+          {q.trim().length<2&&<p style={{padding:"24px 20px",color:"var(--soft)",fontSize:14,margin:0}}>Escribe al menos dos letras para buscar en los tres trimestres.</p>}
+          {q.trim().length>=2&&res.length===0&&<p style={{padding:"24px 20px",color:"var(--soft)",fontSize:14,margin:0}}>Sin resultados para «{q}».</p>}
+          {res.map((r,i)=>(
+            <button key={i} onClick={()=>{onGo(r.t.id);onClose();}} style={{display:"block",width:"100%",textAlign:"left",border:"none",borderBottom:"1px solid var(--line)",background:"transparent",padding:"13px 20px",cursor:"pointer"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(0,0,0,.04)"}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:2}}>
+                <span className="fm" style={{fontSize:10,fontWeight:600,padding:"2px 6px",borderRadius:12,background:r.t.c,color:"#fff",filter:"brightness(.75)"}}>{r.t.s}</span>
+                <span style={{fontWeight:600,fontSize:14}}>{r.c.t}</span>
+                <span className="fm" style={{fontSize:10,color:"var(--soft)",marginLeft:"auto"}}>{r.c.p}</span>
+              </div>
+              <p style={{fontSize:12.5,color:"var(--soft)",margin:0,lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical"}}>{r.c.d}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── TRIMESTRE ── */
+function Trimestre({tri,goHome}){
+  const TABS=[
+    {id:"resumen",l:"Resumen",ic:"layers"},
+    {id:"conceptos",l:"Conceptos",ic:"book"},
+    {id:"guia",l:"Guía",ic:"list"},
+    {id:"flashcards",l:"Flashcards",ic:"card"},
+    {id:"simulador",l:"Simulador",ic:"target"},
+  ];
+  const [tab,setTab]=useState("resumen");
+  useEffect(()=>window.scrollTo({top:0,behavior:"auto"}),[tab,tri.id]);
+  const {c:accent,cd:dark}=tri;
+  return(
+    <div className="afi">
+      <div style={{background:"var(--tinta)",color:"var(--papel)",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,opacity:.45,background:`radial-gradient(800px 300px at 90% -5%, ${accent}50, transparent 60%)`}}/>
+        <div style={{maxWidth:1100,margin:"0 auto",padding:"18px clamp(20px,5vw,56px)",position:"relative",zIndex:2}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <button onClick={goHome} style={{display:"inline-flex",alignItems:"center",gap:7,background:"transparent",border:"1px solid rgba(244,239,230,.25)",color:"var(--papel)",borderRadius:30,padding:"7px 14px",cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>
+              <I n="arrl" s={14}/> Inicio
+            </button>
+            <span className="fm" style={{fontSize:10,letterSpacing:".14em",opacity:.65,textTransform:"uppercase"}}>Español II · {tri.s}</span>
+          </div>
+          <div style={{padding:"28px 0 22px"}}>
+            <div className="fm" style={{fontSize:11,letterSpacing:".18em",color:accent,marginBottom:10,textTransform:"uppercase"}}>{tri.n}</div>
+            <h2 className="fd" style={{fontSize:"clamp(28px,5vw,54px)",fontWeight:700,lineHeight:.97,letterSpacing:"-.02em",margin:"0 0 12px",maxWidth:700}}>
+              {tri.lema}<span style={{color:accent}}>.</span>
+            </h2>
+            <p style={{fontSize:"clamp(13px,1.8vw,16px)",lineHeight:1.55,maxWidth:560,color:"rgba(244,239,230,.75)",margin:0}}>{tri.desc}</p>
+          </div>
+        </div>
+        <div style={{maxWidth:1100,margin:"0 auto",padding:"0 clamp(20px,5vw,56px)",position:"relative",zIndex:2}}>
+          <div style={{display:"flex",gap:2,overflowX:"auto",borderTop:"1px solid rgba(244,239,230,.15)"}}>
+            {TABS.map(t=>(
+              <button key={t.id} onClick={()=>setTab(t.id)} className={"tabbtn fm"+(tab===t.id?" active":"")} style={{display:"inline-flex",alignItems:"center",gap:7,whiteSpace:"nowrap",padding:"14px 15px",fontSize:12,letterSpacing:".07em",textTransform:"uppercase",color:tab===t.id?accent:"rgba(244,239,230,.5)"}}>
+                <I n={t.ic} s={14}/>{t.l}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div style={{maxWidth:1100,margin:"0 auto",padding:"clamp(24px,4vw,48px) clamp(20px,5vw,56px) 80px"}}>
+        {tab==="resumen"    && <Resumen    tri={tri} setTab={setTab} accent={accent} dark={dark}/>}
+        {tab==="conceptos"  && <Conceptos  tri={tri} accent={accent} dark={dark}/>}
+        {tab==="guia"       && <Guia       tri={tri} accent={accent} dark={dark}/>}
+        {tab==="flashcards" && <Flashcards tri={tri} accent={accent} dark={dark}/>}
+        {tab==="simulador"  && <Simulador  tri={tri} accent={accent} dark={dark}/>}
+      </div>
+    </div>
+  );
+}
+
+function Resumen({tri,setTab,accent,dark}){
+  return(
+    <div className="afu">
+      <style>{`@media(max-width:720px){.rg{grid-template-columns:1fr !important;}}`}</style>
+      <div className="rg" style={{display:"grid",gap:28,gridTemplateColumns:"minmax(0,1.6fr) minmax(0,1fr)",alignItems:"start"}}>
+        <div>
+          <h3 className="fd" style={{fontSize:24,fontWeight:600,margin:"0 0 6px"}}>Lo que vas a estudiar</h3>
+          <p style={{color:"var(--soft)",fontSize:14.5,lineHeight:1.55,margin:"0 0 22px",maxWidth:520}}>Ejes del trimestre. Cada uno reúne temas con referencia exacta al libro de texto.</p>
+          <ol style={{listStyle:"none",padding:0,margin:0}}>
+            {tri.ejes.map((e,i)=>(
+              <li key={e} style={{display:"flex",alignItems:"baseline",gap:14,padding:"13px 0",borderBottom:"1px solid var(--line)"}}>
+                <span className="fm" style={{fontSize:12,color:dark,fontWeight:600,minWidth:22}}>{String(i+1).padStart(2,"0")}</span>
+                <span className="fd" style={{fontSize:18,fontWeight:500}}>{e}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <aside style={{background:"var(--tinta)",borderRadius:18,padding:"24px 22px",color:"var(--papel)",position:"sticky",top:18}}>
+          <div className="fm" style={{fontSize:10,letterSpacing:".14em",opacity:.6,textTransform:"uppercase",marginBottom:16}}>Este trimestre incluye</div>
+          {[
+            {n:tri.conceptos.length,l:"conceptos con referencia",ic:"book",tab:"conceptos"},
+            {n:tri.flash.length,   l:"flashcards para repasar",ic:"card",tab:"flashcards"},
+            {n:tri.sim.length,     l:"reactivos en el simulador",ic:"target",tab:"simulador"},
+          ].map((s,i)=>(
+            <button key={i} onClick={()=>setTab(s.tab)} style={{display:"flex",alignItems:"center",gap:12,width:"100%",textAlign:"left",background:"transparent",border:"none",borderTop:i>0?"1px solid rgba(244,239,230,.12)":"none",padding:"13px 0",cursor:"pointer",color:"var(--papel)"}}>
+              <span style={{color:accent}}><I n={s.ic} s={22}/></span>
+              <span className="fd" style={{fontSize:28,fontWeight:700,minWidth:38}}>{s.n}</span>
+              <span style={{fontSize:13,opacity:.8,lineHeight:1.3}}>{s.l}</span>
+              <span style={{marginLeft:"auto",opacity:.5}}><I n="arr" s={15}/></span>
+            </button>
+          ))}
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function Conceptos({tri,accent,dark}){
+  const cls=["Todos",...[...new Set(tri.conceptos.map(c=>c.cl))]];
+  const [f,setF]=useState("Todos");
+  const lista=f==="Todos"?tri.conceptos:tri.conceptos.filter(c=>c.cl===f);
+  return(
+    <div className="afu">
+      <h3 className="fd" style={{fontSize:24,fontWeight:600,margin:"0 0 4px"}}>Conceptos clave</h3>
+      <p style={{color:"var(--soft)",fontSize:14.5,margin:"0 0 20px"}}>Filtra por eje temático. Cada tarjeta indica la página del libro.</p>
+      <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:24}}>
+        {cls.map(c=>(
+          <button key={c} onClick={()=>setF(c)} className="fm" style={{fontSize:11.5,letterSpacing:".02em",padding:"7px 13px",borderRadius:24,cursor:"pointer",fontFamily:"inherit",transition:"all .15s",border:`1px solid ${f===c?accent:"var(--line)"}`,background:f===c?accent:"var(--card)",color:f===c?"#fff":"var(--soft)",fontWeight:f===c?600:400,filter:f===c?"brightness(.9)":"none"}}>
+            {c}
+          </button>
+        ))}
+      </div>
+      <div style={{display:"grid",gap:12,gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))"}}>
+        {lista.map((c,i)=>(
+          <article key={i} className="afu" style={{background:"var(--card)",border:"1px solid var(--line)",borderRadius:14,padding:"18px 18px 16px",animationDelay:`${i*.02}s`,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",left:0,top:0,bottom:0,width:4,background:accent}}/>
+            <div className="fm" style={{fontSize:9.5,letterSpacing:".08em",color:dark,textTransform:"uppercase",marginBottom:6,fontWeight:600}}>{c.cl}</div>
+            <h4 className="fd" style={{fontSize:18,fontWeight:600,margin:"0 0 6px",lineHeight:1.15}}>{c.t}</h4>
+            <p style={{fontSize:13.5,color:"var(--soft)",lineHeight:1.5,margin:"0 0 12px"}}>{c.d}</p>
+            <div className="fm" style={{fontSize:10.5,color:"var(--tinta)",display:"inline-flex",alignItems:"center",gap:5,background:"var(--papel)",padding:"3px 9px",borderRadius:20,border:"1px solid var(--line)"}}>
+              <I n="book" s={11}/>{c.p}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Guia({tri,accent,dark}){
+  const cls=[...new Set(tri.conceptos.map(c=>c.cl))];
+  const [open,setOpen]=useState(cls[0]);
+  return(
+    <div className="afu">
+      <h3 className="fd" style={{fontSize:24,fontWeight:600,margin:"0 0 4px"}}>Guía por temas</h3>
+      <p style={{color:"var(--soft)",fontSize:14.5,margin:"0 0 20px"}}>Despliega cada eje para ver sus temas y la página del libro.</p>
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {cls.map(cl=>{
+          const items=tri.conceptos.filter(c=>c.cl===cl);
+          const ab=open===cl;
+          return(
+            <div key={cl} style={{border:"1px solid var(--line)",borderRadius:14,overflow:"hidden",background:"var(--card)"}}>
+              <button onClick={()=>setOpen(ab?null:cl)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",padding:"15px 18px",background:"transparent",border:"none",cursor:"pointer",fontFamily:"inherit",textAlign:"left"}}>
+                <span style={{display:"flex",alignItems:"center",gap:10}}>
+                  <span style={{width:8,height:8,borderRadius:3,background:accent,display:"inline-block",flexShrink:0}}/>
+                  <span className="fd" style={{fontSize:18,fontWeight:600}}>{cl}</span>
+                  <span className="fm" style={{fontSize:10.5,color:"var(--soft)"}}>{items.length} temas</span>
+                </span>
+                <span style={{color:dark,transform:ab?"rotate(180deg)":"none",transition:"transform .22s"}}><I n="chev" s={18}/></span>
+              </button>
+              {ab&&(
+                <div className="afu" style={{padding:"0 18px 8px"}}>
+                  {items.map((c,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"baseline",gap:12,padding:"12px 0",borderTop:"1px solid var(--line)"}}>
+                      <div style={{flex:1}}>
+                        <div style={{fontWeight:600,fontSize:14.5,marginBottom:2}}>{c.t}</div>
+                        <div style={{fontSize:13,color:"var(--soft)",lineHeight:1.45}}>{c.d}</div>
+                      </div>
+                      <span className="fm" style={{fontSize:10.5,color:dark,whiteSpace:"nowrap",fontWeight:500,flexShrink:0}}>{c.p}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Flashcards({tri,accent,dark}){
+  const cards=tri.flash;
+  const [idx,setIdx]=useState(0);
+  const [flip,setFlip]=useState(false);
+  const [dom,setDom]=useState({});
+  const card=cards[idx];
+  const go=d=>{ setFlip(false); setTimeout(()=>setIdx(p=>(p+d+cards.length)%cards.length),130); };
+  const marcar=()=>setDom(p=>({...p,[idx]:!p[idx]}));
+  const nDom=Object.values(dom).filter(Boolean).length;
+  return(
+    <div className="afu">
+      <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",flexWrap:"wrap",gap:10,marginBottom:18}}>
+        <div>
+          <h3 className="fd" style={{fontSize:24,fontWeight:600,margin:"0 0 4px"}}>Flashcards</h3>
+          <p style={{color:"var(--soft)",fontSize:14.5,margin:0}}>Toca la tarjeta para ver la respuesta.</p>
+        </div>
+        <div className="fm" style={{fontSize:12,color:"var(--soft)"}}>Dominadas: <span style={{color:dark,fontWeight:600}}>{nDom}</span> / {cards.length}</div>
+      </div>
+      <div style={{height:5,background:"var(--line)",borderRadius:10,overflow:"hidden",marginBottom:22}}>
+        <div style={{height:"100%",width:`${(nDom/cards.length)*100}%`,background:accent,transition:"width .4s",borderRadius:10}}/>
+      </div>
+
+      <div className={"flip-wrap"+(flip?" flipped":"")} style={{maxWidth:540,margin:"0 auto"}}>
+        <div className="flip-inner" style={{minHeight:260}}>
+          <div className="flip-face" onClick={()=>setFlip(true)} style={{border:"1px solid var(--line)",borderRadius:18,background:"var(--card)",padding:"30px 26px",minHeight:260,display:"flex",flexDirection:"column",cursor:"pointer",boxShadow:"0 8px 28px -18px rgba(0,0,0,.28)"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+              <span className="fm" style={{fontSize:10.5,letterSpacing:".1em",color:dark,textTransform:"uppercase",fontWeight:600}}>Pregunta {idx+1} de {cards.length}</span>
+              {dom[idx]&&<span style={{color:accent}}><I n="check" s={18}/></span>}
+            </div>
+            <p className="fd" style={{fontSize:22,fontWeight:500,lineHeight:1.25,flex:1,display:"flex",alignItems:"center",margin:0}}>{card.q}</p>
+            <div className="fm" style={{fontSize:10.5,color:"var(--soft)",display:"flex",alignItems:"center",gap:5,marginTop:16}}><I n="rot" s={12}/> Toca para voltear</div>
+          </div>
+          <div className="flip-face flip-back" onClick={()=>setFlip(false)} style={{border:`1px solid ${accent}`,borderRadius:18,background:"var(--tinta)",color:"var(--papel)",padding:"30px 26px",minHeight:260,display:"flex",flexDirection:"column",cursor:"pointer"}}>
+            <span className="fm" style={{fontSize:10.5,letterSpacing:".1em",color:accent,textTransform:"uppercase",fontWeight:600,marginBottom:14}}>Respuesta</span>
+            <p style={{fontSize:17,lineHeight:1.5,flex:1,display:"flex",alignItems:"center",margin:0}}>{card.a}</p>
+            <div className="fm" style={{fontSize:10.5,opacity:.6,marginTop:14,display:"flex",alignItems:"center",gap:5}}><I n="book" s={12}/>{card.p}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:22,flexWrap:"wrap"}}>
+        <button onClick={()=>go(-1)} style={btnS()}><I n="arrl" s={15}/> Anterior</button>
+        <button onClick={marcar} style={{...btnS(),background:dom[idx]?accent:"var(--card)",color:dom[idx]?"#fff":"var(--tinta)",borderColor:dom[idx]?accent:"var(--line)",filter:dom[idx]?"brightness(.9)":"none"}}>
+          <I n="check" s={15}/> {dom[idx]?"Dominada":"Marcar dominada"}
+        </button>
+        <button onClick={()=>go(1)} style={btnS()}>Siguiente <I n="arr" s={15}/></button>
+      </div>
+    </div>
+  );
+}
+const btnS=()=>({display:"inline-flex",alignItems:"center",gap:7,padding:"10px 17px",borderRadius:30,border:"1px solid var(--line)",background:"var(--card)",cursor:"pointer",fontFamily:"inherit",fontSize:13.5,color:"var(--tinta)"});
+
+function Simulador({tri,accent,dark}){
+  const qs=tri.sim;
+  const [i,setI]=useState(0);
+  const [resp,setResp]=useState({});
+  const [fin,setFin]=useState(false);
+  const q=qs[i];
+  const ans=resp[i];
+  const responder=o=>{
+    if(ans!==undefined)return;
+    setResp(p=>({...p,[i]:{sel:o,ok:o===q.ok}}));
+  };
+  const next=()=>{ if(i+1<qs.length)setI(i+1); else setFin(true); };
+  const reiniciar=()=>{ setI(0);setResp({});setFin(false); };
+  const aciertos=Object.values(resp).filter(r=>r.ok).length;
+  if(fin){
+    const pct=Math.round((aciertos/qs.length)*100);
+    return(
+      <div className="asc" style={{maxWidth:480,margin:"10px auto",textAlign:"center"}}>
+        <div style={{color:dark,display:"flex",justifyContent:"center",marginBottom:8}}><I n="spark" s={32}/></div>
+        <h3 className="fd" style={{fontSize:28,fontWeight:700,margin:"0 0 6px"}}>Terminaste el simulador</h3>
+        <p style={{color:"var(--soft)",marginBottom:22}}>{pct>=80?"Dominas muy bien este trimestre.":pct>=50?"Buen avance; repasa lo que falló.":"Vale la pena volver a los conceptos y las flashcards."}</p>
+        <div style={{background:"var(--tinta)",color:"var(--papel)",borderRadius:18,padding:"28px",marginBottom:22}}>
+          <div className="fd" style={{fontSize:60,fontWeight:900,lineHeight:1,color:accent}}>{pct}%</div>
+          <div className="fm" style={{fontSize:12,opacity:.75,marginTop:4}}>{aciertos} de {qs.length} correctas</div>
+        </div>
+        <button onClick={reiniciar} style={btnS()}><I n="rot" s={15}/> Intentar de nuevo</button>
+      </div>
+    );
+  }
+  return(
+    <div className="afu" style={{maxWidth:640,margin:"0 auto"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+        <span className="fm" style={{fontSize:11,color:dark,fontWeight:600,letterSpacing:".05em",textTransform:"uppercase"}}>{q.b}</span>
+        <span className="fm" style={{fontSize:11,color:"var(--soft)"}}>{i+1} / {qs.length}</span>
+      </div>
+      <div style={{height:5,background:"var(--line)",borderRadius:10,overflow:"hidden",marginBottom:20}}>
+        <div style={{height:"100%",width:`${((i+(ans!==undefined?1:0))/qs.length)*100}%`,background:accent,transition:"width .35s"}}/>
+      </div>
+      <h3 className="fd" style={{fontSize:22,fontWeight:600,lineHeight:1.3,margin:"0 0 18px"}}>{q.q}</h3>
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {q.ops.map((o,oi)=>{
+          let bg="var(--card)",bd="var(--line)";
+          if(ans!==undefined){
+            if(oi===q.ok){bg="rgba(111,143,114,.15)";bd="var(--verde)";}
+            else if(oi===ans.sel){bg="rgba(184,92,56,.12)";bd="var(--terracota)";}
+          }
+          return(
+            <button key={oi} onClick={()=>responder(oi)} disabled={ans!==undefined} style={{display:"flex",alignItems:"center",gap:12,textAlign:"left",padding:"13px 15px",borderRadius:12,cursor:ans!==undefined?"default":"pointer",border:`1.5px solid ${bd}`,background:bg,fontFamily:"inherit",fontSize:14.5}}>
+              <span className="fm" style={{width:26,height:26,borderRadius:7,flexShrink:0,display:"grid",placeItems:"center",fontSize:11.5,fontWeight:600,border:`1px solid ${bd}`,background:ans!==undefined&&(oi===q.ok)?"var(--verde)":(ans!==undefined&&oi===ans.sel?"var(--terracota)":"transparent"),color:ans!==undefined&&(oi===q.ok||oi===ans?.sel)?"#fff":"var(--soft)"}}>
+                {ans!==undefined?(oi===q.ok?<I n="check" s={13}/>:(oi===ans.sel?<I n="x" s={13}/>:String.fromCharCode(65+oi))):String.fromCharCode(65+oi)}
+              </span>
+              <span style={{flex:1}}>{o}</span>
+            </button>
+          );
+        })}
+      </div>
+      {ans!==undefined&&(
+        <div className="afu" style={{marginTop:14,padding:"14px 16px",borderRadius:12,background:ans.ok?"rgba(111,143,114,.1)":"rgba(184,92,56,.08)",border:`1px solid ${ans.ok?"var(--verde)":"var(--terracota)"}`}}>
+          <div className="fm" style={{fontSize:10.5,fontWeight:600,letterSpacing:".07em",textTransform:"uppercase",color:ans.ok?"var(--verde)":"var(--terracota)",marginBottom:5}}>{ans.ok?"Correcto":"Para repasar"}</div>
+          <p style={{margin:0,fontSize:13.5,lineHeight:1.5,color:"var(--soft)"}}>{q.why}</p>
+        </div>
+      )}
+      {ans!==undefined&&(
+        <div style={{display:"flex",justifyContent:"flex-end",marginTop:18}}>
+          <button onClick={next} style={{...btnS(),background:"var(--tinta)",color:"var(--papel)",borderColor:"var(--tinta)"}}>
+            {i+1<qs.length?"Siguiente":"Ver resultado"} <I n="arr" s={15}/>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── APP ── */
+function App(){
+  const [vista,setVista]=useState("portada");
+  const [busca,setBusca]=useState(false);
+  useEffect(()=>{
+    const h=e=>{if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();setBusca(true);}};
+    window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
+  },[]);
+  const tri=T.find(t=>t.id===vista);
+  const cerrarBusca=useCallback(()=>setBusca(false),[]);
+  return(
+    <div style={{position:"relative",zIndex:2,minHeight:"100vh"}}>
+      <button onClick={()=>setBusca(true)} aria-label="Buscar tema" style={{position:"fixed",right:"clamp(14px,3vw,28px)",bottom:"clamp(14px,3vw,28px)",zIndex:40,display:"inline-flex",alignItems:"center",gap:8,padding:"11px 16px",borderRadius:30,background:"var(--tinta)",color:"var(--papel)",border:"none",cursor:"pointer",boxShadow:"0 10px 28px -10px rgba(0,0,0,.55)",fontFamily:"inherit",fontSize:13}}>
+        <I n="search" s={16}/> Buscar
+        <span className="fm" style={{fontSize:9.5,opacity:.55,border:"1px solid rgba(244,239,230,.3)",borderRadius:4,padding:"1px 5px"}}>⌘K</span>
+      </button>
+      {vista==="portada"
+        ? <Portada onEnter={setVista}/>
+        : <Trimestre tri={tri} goHome={()=>setVista("portada")}/>
+      }
+      <Buscador open={busca} onClose={cerrarBusca} onGo={id=>{setVista(id);}}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
